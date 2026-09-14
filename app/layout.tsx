@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./features.css";
 import "./fixes.css";
+import "./read-aloud.css";
 
 export const metadata: Metadata = {
-  title: "小讀芽｜閱讀出題室",
-  description: "上傳文章，依孩子的程度製作閱讀理解、心智圖與開放題學習單。",
+  title: "每一頁，都算數｜閱讀學習單",
+  description: "讀的每一頁，都算數。依孩子的程度製作閱讀理解、心智圖、開放題與小文章。",
   other: {
     "codex-preview": "development",
   },

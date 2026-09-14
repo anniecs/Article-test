@@ -1,9 +1,150 @@
 "use client";
-import {useState} from 'react';
-import {Lightbulb,Check,RotateCcw} from 'lucide-react';
-import type {Sheet,Words} from './sample';
-export default function MindMap({sheet,words,answers,setAnswers,showAnswers}:{sheet:Sheet;words:(w:Words)=>React.ReactNode;answers:Record<string,string>;setAnswers:(a:Record<string,string>)=>void;showAnswers:boolean}){
- const [selected,setSelected]=useState('');const kindergarten=sheet.level.startsWith('幼兒園');
- const choose=(i:number,value:string)=>{if(value){setAnswers({...answers,['m'+i]:value});setSelected('');}};
- return <><div className="exercise-heading"><h3>把故事連起來</h3><span>心智圖考題</span></div><p className="exercise-intro">{kindergarten?'拖曳答案到空格，或先點答案，再點空格。':'沿著分支回想故事，在空格裡寫下你的答案。'}</p>{kindergarten&&<div className="answer-bank"><span>答案小卡</span>{[...sheet.mind].reverse().map((m,i)=><button key={i} draggable onDragStart={e=>e.dataTransfer.setData('text/plain',m.answer.text)} aria-pressed={selected===m.answer.text} className={selected===m.answer.text?'selected':''} onClick={()=>setSelected(selected===m.answer.text?'':m.answer.text)}>{words(m.answer)}</button>)}</div>}<div className="map-scroll"><div className="radial-map"><svg className="map-lines" viewBox="0 0 700 470" preserveAspectRatio="none" aria-hidden="true"><path d="M350 235 C240 235 310 108 160 108"/><path d="M350 235 C470 235 385 108 545 108"/><path d="M350 235 C240 235 310 367 160 367"/><path d="M350 235 C470 235 385 367 545 367"/></svg><div className="radial-center"><Lightbulb size={32}/><strong>{words(sheet.mindTitle)}</strong><span>故事心智圖</span></div>{sheet.mind.slice(0,4).map((m,i)=><div className={'radial-node node-'+i} key={i}><span className="branch-label">{words(m.label)}</span><p>{words(m.prompt)}</p>{kindergarten?<button className={'answer-slot '+(answers['m'+i]?'filled':'')} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const value=e.dataTransfer.getData('text/plain');if(sheet.mind.some(n=>n.answer.text===value))choose(i,value);}} onClick={()=>choose(i,selected)} aria-label={'填入答案：'+m.prompt.text}>{answers['m'+i]?words(sheet.mind.find(n=>n.answer.text===answers['m'+i])?.answer||{text:answers['m'+i],zhuyin:[]}):'＋ 放入答案'} </button>:<input aria-label={m.prompt.text} placeholder="寫下你的想法" value={answers['m'+i]||''} onChange={e=>setAnswers({...answers,['m'+i]:e.target.value})}/ >}{showAnswers&&<div className="map-reference"><Check size={13}/>{words(m.answer)}</div>}</div>)}</div></div><div className="map-bottom"><span>小螢幕可左右滑動心智圖。</span><button onClick={()=>{const next={...answers};sheet.mind.forEach((_,i)=>delete next['m'+i]);setAnswers(next);setSelected('');}}><RotateCcw size={14}/>重新填寫</button></div></>
+import { useState } from "react";
+import { Lightbulb, Check, RotateCcw } from "lucide-react";
+import type { Sheet, Words } from "./sample";
+import SpeakButton from "./SpeakButton";
+export default function MindMap({
+  sheet,
+  words,
+  answers,
+  setAnswers,
+  showAnswers,
+  apiKey,
+}: {
+  sheet: Sheet;
+  words: (w: Words) => React.ReactNode;
+  answers: Record<string, string>;
+  setAnswers: (a: Record<string, string>) => void;
+  showAnswers: boolean;
+  apiKey: string;
+}) {
+  const [selected, setSelected] = useState("");
+  const kindergarten = sheet.level.startsWith("幼兒園");
+  const choose = (i: number, value: string) => {
+    if (value) {
+      setAnswers({ ...answers, ["m" + i]: value });
+      setSelected("");
+    }
+  };
+  return (
+    <>
+      <div className="exercise-heading">
+        <h3>把故事連起來</h3>
+        <span>心智圖考題</span>
+      </div>
+      <p className="exercise-intro">
+        {kindergarten
+          ? "拖曳答案到空格，或先點答案，再點空格。"
+          : "沿著分支回想故事，在空格裡寫下你的答案。"}
+      </p>
+      {kindergarten && (
+        <div className="answer-bank">
+          <span>答案小卡</span>
+          {[...sheet.mind].reverse().map((m, i) => (
+            <button
+              key={i}
+              draggable
+              onDragStart={(e) =>
+                e.dataTransfer.setData("text/plain", m.answer.text)
+              }
+              aria-pressed={selected === m.answer.text}
+              className={selected === m.answer.text ? "selected" : ""}
+              onClick={() =>
+                setSelected(selected === m.answer.text ? "" : m.answer.text)
+              }
+            >
+              {words(m.answer)}
+            </button>
+          ))}
+        </div>
+      )}
+      <div className="map-scroll">
+        <div className="radial-map">
+          <svg
+            className="map-lines"
+            viewBox="0 0 700 470"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <path d="M350 235 C240 235 310 108 160 108" />
+            <path d="M350 235 C470 235 385 108 545 108" />
+            <path d="M350 235 C240 235 310 367 160 367" />
+            <path d="M350 235 C470 235 385 367 545 367" />
+          </svg>
+          <div className="radial-center">
+            <Lightbulb size={32} />
+            <strong>{words(sheet.mindTitle)}</strong>
+            <span>故事心智圖</span>
+          </div>
+          {sheet.mind.slice(0, 4).map((m, i) => (
+            <div className={"radial-node node-" + i} key={i}>
+              <span className="branch-label">{words(m.label)}</span>
+              <div className="mind-prompt">
+                <p>{words(m.prompt)}</p>
+                <SpeakButton
+                  text={m.prompt.text}
+                  label="朗讀心智圖題目"
+                  sample={sheet.sample}
+                  apiKey={apiKey}
+                />
+              </div>
+              {kindergarten ? (
+                <button
+                  className={
+                    "answer-slot " + (answers["m" + i] ? "filled" : "")
+                  }
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const value = e.dataTransfer.getData("text/plain");
+                    if (sheet.mind.some((n) => n.answer.text === value))
+                      choose(i, value);
+                  }}
+                  onClick={() => choose(i, selected)}
+                  aria-label={"填入答案：" + m.prompt.text}
+                >
+                  {answers["m" + i]
+                    ? words(
+                        sheet.mind.find(
+                          (n) => n.answer.text === answers["m" + i],
+                        )?.answer || { text: answers["m" + i], zhuyin: [] },
+                      )
+                    : "＋ 放入答案"}{" "}
+                </button>
+              ) : (
+                <input
+                  aria-label={m.prompt.text}
+                  placeholder="寫下你的想法"
+                  value={answers["m" + i] || ""}
+                  onChange={(e) =>
+                    setAnswers({ ...answers, ["m" + i]: e.target.value })
+                  }
+                />
+              )}
+              {showAnswers && (
+                <div className="map-reference">
+                  <Check size={13} />
+                  {words(m.answer)}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="map-bottom">
+        <span>小螢幕可左右滑動心智圖。</span>
+        <button
+          onClick={() => {
+            const next = { ...answers };
+            sheet.mind.forEach((_, i) => delete next["m" + i]);
+            setAnswers(next);
+            setSelected("");
+          }}
+        >
+          <RotateCcw size={14} />
+          重新填寫
+        </button>
+      </div>
+    </>
+  );
 }

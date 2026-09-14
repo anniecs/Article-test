@@ -1,0 +1,211 @@
+body,
+button,
+input,
+textarea,
+select,
+body * {
+  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+
+.phonetic {
+  line-height: 2.5;
+}
+
+.phonetic ruby {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-inline-end: 0.16em;
+  ruby-position: inter-character;
+  font-weight: inherit;
+}
+
+.phonetic rt {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  margin-inline-start: 0.08em;
+  color: #8d7965;
+  font-size: 0.48em;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.question-title {
+  align-items: center;
+}
+
+.question-title h4 {
+  flex: 1;
+}
+
+.speak-button {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 1px solid #d9c9b8;
+  border-radius: 50%;
+  background: #fffaf3;
+  color: #795b46;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+}
+
+.speak-button:hover {
+  background: #eee2d4;
+  transform: translateY(-1px);
+}
+
+.speak-control {
+  display: inline-flex;
+  align-items: center;
+}
+
+.speak-button.playing {
+  color: #fff;
+  background: #795b46;
+  box-shadow: 0 0 0 4px #d9c9b866;
+}
+
+.speak-button.error {
+  color: #9b3e35;
+  border-color: #c8897f;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.read-aloud-note {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 16px 0 24px;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: #f5ede2;
+  color: #765f4a;
+  font-size: 14px;
+}
+
+.read-aloud-note .speak-button {
+  background: #795b46;
+  color: #fff;
+}
+
+.options .option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 3px 8px 3px 0;
+  border: 1px solid #e7ddd0;
+  border-radius: 7px;
+  background: #fff;
+}
+
+.options .option-row label {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.options .option-row .speak-button {
+  width: 32px;
+  height: 32px;
+  flex-basis: 32px;
+}
+
+.options .option-row.chosen {
+  border-color: #ad8d6e;
+  background: #f7eee2;
+}
+
+.options .option-row.correct {
+  border-color: #7d9a70;
+  background: #eef5e9;
+}
+
+.mind-prompt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 16px;
+}
+
+.mind-prompt p {
+  flex: 1;
+  margin: 0;
+}
+
+.mind-prompt .speak-button {
+  width: 32px;
+  height: 32px;
+  flex-basis: 32px;
+}
+
+.adapted-story {
+  font-family: inherit;
+  padding-top: 8px;
+}
+
+.sentence-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e3d6c7;
+}
+
+.sentence-row p {
+  flex: 1;
+  font-size: 21px;
+  line-height: 2.8;
+}
+
+.worksheet-header h2,
+.radial-center strong,
+.original-text,
+.vault-document h2,
+.book-cover span {
+  font-family: inherit;
+}
+
+@media (max-width: 700px) {
+  .phonetic rt {
+    font-size: 0.5em;
+  }
+
+  .sentence-row {
+    align-items: flex-start;
+  }
+
+  .sentence-row .speak-button {
+    margin-top: 13px;
+  }
+}
+
+@media print {
+  .speak-button,
+  .read-aloud-note {
+    display: none !important;
+  }
+
+  .phonetic ruby {
+    margin-inline-end: 0.12em;
+  }
+}
