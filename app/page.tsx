@@ -30,9 +30,6 @@ export default function Home() {
     [title, setTitle] = useState("獅子與豪豬"),
     [article, setArticle] = useState(""),
     [level, setLevel] = useState("幼兒園"),
-    [difficulty, setDifficulty] = useState("適中"),
-    [grade, setGrade] = useState("1–2年級"),
-    [zh, setZh] = useState(true),
     [files, setFiles] = useState<File[]>([]),
     [demo, setDemo] = useState(true),
     [sheet, setSheet] = useState<Sheet>(sample("幼兒園", "適中")),
@@ -55,20 +52,7 @@ export default function Home() {
       .then((d) => setKeyReady((d as { ready: boolean }).ready))
       .catch(() => {});
   }, []);
-  const words = (w: Words) => (
-    <span className={zh ? "phonetic" : ""}>
-      {Array.from(w.text).map((c, i) =>
-        zh && w.zhuyin[i] ? (
-          <ruby key={i}>
-            {c}
-            <rt>{w.zhuyin[i]}</rt>
-          </ruby>
-        ) : (
-          <span key={i}>{c}</span>
-        ),
-      )}
-    </span>
-  );
+  const words = (w: Words) => <span>{w.text}</span>;
   const sentences = (w: Words) => {
     const chars = Array.from(w.text);
     const parts: Words[] = [];
@@ -76,12 +60,12 @@ export default function Home() {
     chars.forEach((char, index) => {
       if (/[。！？!?…\n]/.test(char)) {
         const text = chars.slice(start, index + 1).join("").trim();
-        if (text) parts.push({ text, zhuyin: w.zhuyin.slice(start, index + 1) });
+        if (text) parts.push({ text, zhuyin: [] });
         start = index + 1;
       }
     });
     const text = chars.slice(start).join("").trim();
-    if (text) parts.push({ text, zhuyin: w.zhuyin.slice(start) });
+    if (text) parts.push({ text, zhuyin: [] });
     return parts;
   };
   function clearResults() {
@@ -119,7 +103,7 @@ export default function Home() {
     try {
       if (demo) {
         setSheet({
-          ...sample(level, difficulty, grade),
+          ...sample(level, "適中", "1–2年級"),
           source,
           title: title || "獅子與豪豬",
         });
@@ -143,8 +127,6 @@ export default function Home() {
       form.set("title", title);
       form.set("article", article);
       form.set("level", level);
-      form.set("grade", grade);
-      form.set("difficulty", difficulty);
       files.forEach((f) => form.append("files", f));
       const r = await fetch("/api/generate", {
         method: "POST",
@@ -318,7 +300,7 @@ export default function Home() {
                       <BookOpen />
                       <h3>{item.title}</h3>
                       <p>
-                        {item.level} · {item.difficulty}
+                        {item.level}
                       </p>
                       <div className="tags">
                         {item.tags.map((t) => (
@@ -469,7 +451,7 @@ export default function Home() {
                   </div>
                   <label className="field">學習階段</label>
                   <div className="segmented">
-                    {["幼兒園", "小學"].map((l) => (
+                    {["幼兒園", "小學低年級"].map((l) => (
                       <button
                         key={l}
                         aria-pressed={level === l}
@@ -480,52 +462,11 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
-                  {level === "小學" && (
-                    <label className="field">
-                      年級
-                      <select
-                        value={grade}
-                        onChange={(e) => setGrade(e.target.value)}
-                      >
-                        {["1–2年級", "3–4年級", "5–6年級"].map((g) => (
-                          <option key={g}>{g}</option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
-                  <label className="field">閱讀程度</label>
-                  <div className="segmented difficulty">
-                    {["入門", "適中", "挑戰"].map((d) => (
-                      <button
-                        key={d}
-                        className={difficulty === d ? "selected" : ""}
-                        aria-pressed={difficulty === d}
-                        onClick={() => setDifficulty(d)}
-                      >
-                        {d}
-                      </button>
-                    ))}
-                  </div>
                   <p className="field-note">
                     {level === "幼兒園"
-                      ? "短句提問，可由大人念題、孩子口說。"
-                      : "依年級調整字詞，練習理解、推論與統整。"}
+                      ? "使用短句與具體事件，適合大人陪讀、孩子口說。"
+                      : "使用較完整的句子，練習理解、因果與簡單推論。"}
                   </p>
-                  <div className="zh-control">
-                    <div>
-                      <strong>注音輔助</strong>
-                      <p>題目與選項加上注音</p>
-                    </div>
-                    <label className="toggle">
-                      <input
-                        aria-label="有注音／無注音"
-                        type="checkbox"
-                        checked={zh}
-                        onChange={(e) => setZh(e.target.checked)}
-                      />
-                      <span />
-                    </label>
-                  </div>
                   <button
                     className="primary generate"
                     disabled={busy}
@@ -577,7 +518,6 @@ export default function Home() {
                     <p>{sheet.source}</p>
                     <div className="tags">
                       <span>{sheet.level}</span>
-                      <span>{sheet.difficulty}</span>
                       {sheet.tags.map((t) => (
                         <span key={t}>{t}</span>
                       ))}
@@ -694,7 +634,7 @@ export default function Home() {
                     )}
                     {tab === "mind" && (
                       <MindMap
-                        key={sheet.id || sheet.level + sheet.difficulty}
+                        key={sheet.id || sheet.level}
                         sheet={sheet}
                         words={words}
                         answers={answers}
@@ -759,12 +699,10 @@ export default function Home() {
                       <>
                         <div className="exercise-heading">
                           <h3>再讀一次，小小故事</h3>
-                          <span>
-                            {sheet.level} · {sheet.difficulty}
-                          </span>
+                          <span>{sheet.level}</span>
                         </div>
                         <p className="exercise-intro">
-                          依閱讀程度重新編排，適合孩子練習自己讀。
+                          依學習階段重新編排，適合孩子練習自己讀。
                         </p>
                         <div className="read-aloud-note">
                           <SpeakButton
@@ -820,7 +758,7 @@ export default function Home() {
                 <p className="below-note">
                   {sheet.sample
                     ? "此範例題目依你提供的文章編寫。"
-                    : "AI 產生的題目，請陪讀者確認內容與注音後使用。"}{" "}
+                    : "AI 產生的題目，請陪讀者確認內容後使用。"}{" "}
                   朗讀為合成語音；作答內容僅保留於本次頁面。
                 </p>
               </section>
