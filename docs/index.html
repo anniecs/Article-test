@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#765842" />
+    <meta
+      name="description"
+      content="每一頁，都算數。為幼兒園與小學低年級準備的閱讀學習單。"
+    />
+    <title>每一頁，都算數｜閱讀學習單</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+        background: #f5f0e8;
+        color: #49382d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 18% 12%, #e8ddd0 0 4px, transparent 5px),
+          linear-gradient(145deg, #f8f4ed, #eee4d8);
+      }
+      main {
+        width: min(620px, 100%);
+        padding: clamp(32px, 7vw, 64px);
+        border: 1px solid #d9cbbb;
+        border-radius: 22px;
+        background: rgba(255, 253, 248, 0.94);
+        box-shadow: 0 24px 70px rgba(73, 56, 45, 0.13);
+        text-align: center;
+      }
+      .mark {
+        display: grid;
+        place-items: center;
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 24px;
+        border-radius: 18px;
+        background: #765842;
+        color: #fffaf2;
+        font-size: 30px;
+      }
+      small { color: #8b7665; letter-spacing: .15em; }
+      h1 { margin: 14px 0 10px; font-size: clamp(30px, 7vw, 48px); }
+      p { margin: 0 auto 28px; color: #786454; font-size: 18px; line-height: 1.8; }
+      a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 50px;
+        padding: 0 26px;
+        border-radius: 999px;
+        background: #765842;
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 10px 24px rgba(118, 88, 66, .22);
+      }
+      a:hover { background: #604633; transform: translateY(-1px); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">冊</div>
+      <small>每一頁 · 都算數 · 閱讀學習單</small>
+      <h1>欸你 (Annie)<br />這次看哪一篇～</h1>
+      <p>讀的每一頁，都算數。<br />為幼兒園與小學低年級準備專屬閱讀練習。</p>
+      <a href="https://reading-garden-tw.vdodaco.chatgpt.site/">進入閱讀學習單</a>
+    </main>
+  </body>
+</html>
