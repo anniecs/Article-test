@@ -1,5 +1,5 @@
 export type Words={text:string;zhuyin:string[]};
-export type Sheet={id?:string;sample?:boolean;builtinId?:'lion'|'jellyfish';cover?:string;title:string;source:string;level:string;difficulty:string;tags:string[];article:string;adapted:Words;questions:{prompt:Words;options:Words[];answer:number;explanation:Words}[];mindTitle:Words;mindInstruction:Words;mind:{label:Words;prompt:Words;answer:Words}[];open:{prompt:Words;guide:Words}[]};
+export type Sheet={id?:string;sample?:boolean;builtinId?:'lion'|'jellyfish';cover?:string;coverBrief?:string;title:string;source:string;level:string;difficulty:string;tags:string[];article:string;adapted:Words;questions:{prompt:Words;options:Words[];answer:number;explanation:Words}[];mindTitle:Words;mindInstruction:Words;mind:{label:Words;prompt:Words;answer:Words}[];open:{prompt:Words;guide:Words}[]};
 const readings:Record<string,string>={};
 function add(chars:string,zh:string){Array.from(chars).forEach((c,i)=>readings[c]=zh.split(' ')[i]);}
 add('獅子與豪豬老馬奇萊恩霍爾','ㄕ ㄗˇ ㄩˇ ㄏㄠˊ ㄓㄨ ㄌㄠˇ ㄇㄚˇ ㄑㄧˊ ㄌㄞˊ ㄣ ㄏㄨㄛˋ ㄦˇ');

@@ -47,6 +47,9 @@ export default function Home() {
     [page, setPage] = useState(1);
   const [vaultPassword, setVaultPassword] = useState("");
   const [builtinId, setBuiltinId] = useState<BuiltinId>('lion');
+  const [originalId,setOriginalId] = useState('');
+  const [coverBusy,setCoverBusy] = useState(false);
+  const [coverError,setCoverError] = useState('');
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     fetch("/api/status")
@@ -74,6 +77,7 @@ export default function Home() {
     setAnswers({});
     setShowAnswers(false);
     setSaved(false);
+    setCoverError('');
   }
   function addFiles(list: File[]) {
     setError("");
@@ -97,6 +101,7 @@ export default function Home() {
       return;
     }
     setFiles([...files, ...list]);
+    setOriginalId('');
     setDemo(false);
   }
   async function generate() {
@@ -118,7 +123,7 @@ export default function Home() {
         throw Error("請先解鎖原文區，再上傳新文章。");
       }
       if (!source.trim()) throw Error("請填寫文章來源，方便歸類。");
-      if (!article.trim() && !files.length)
+      if (!article.trim() && !files.length && !originalId)
         throw Error("請先上傳文章或貼上文字。");
       if (!keyReady && !key) {
         setModal(true);
@@ -129,6 +134,7 @@ export default function Home() {
       form.set("title", title);
       form.set("article", article);
       form.set("level", level);
+      if(originalId)form.set('originalId',originalId);
       files.forEach((f) => form.append("files", f));
       const r = await fetch("/api/generate", {
         method: "POST",
@@ -144,11 +150,32 @@ export default function Home() {
       clearResults();
       setSaved(true);
       setTab("reading");
+      setOriginalId(d.id || '');
+      setFiles([]);
+      setArticle('');
+      setTitle(d.title);
+      setSource(d.source);
+      if(!d.cover)await createCover(d);
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
+  }
+  async function createCover(record:Sheet=sheet){
+    if(!record.id)return;
+    setCoverBusy(true);
+    setCoverError('');
+    try{
+      const response=await fetch('/api/cover',{
+        method:'POST',headers:{'Content-Type':'application/json',...(key?{'X-AI-Key':key}:{})},
+        body:JSON.stringify({id:record.id})
+      });
+      const result=await response.json() as {cover?:string;error?:string};
+      if(!response.ok||!result.cover)throw Error(result.error||'學習單已收藏，封面暫時無法生成。請稍後重試。');
+      setSheet(current=>current.id===record.id?{...current,cover:result.cover}:current);
+    }catch(e){setCoverError((e as Error).message);}
+    finally{setCoverBusy(false);}
   }
   async function save() {
     setError("");
@@ -266,6 +293,7 @@ export default function Home() {
                   setTitle("");
                   setArticle("");
                   setFiles([]);
+                  setOriginalId('');
                 }}
               >
                 <Plus size={18} /> 新增文章
@@ -295,10 +323,12 @@ export default function Home() {
                         setError('');
                         setTab('reading');
                         if (item.builtinId) {
+                          setOriginalId('');
                           setBuiltinId(item.builtinId);
                           setDemo(true);
                           setSheet(builtinSheet(item.builtinId, level));
                         } else {
+                          setOriginalId(item.id||'');
                           setDemo(false);
                           setSheet(item);
                           setLevel(item.level);
@@ -350,6 +380,7 @@ export default function Home() {
                       className="text-button"
                       onClick={() => {
                         setDemo(!demo);
+                        setOriginalId('');
                         setBuiltinId('lion');
                         setFiles([]);
                         setArticle("");
@@ -379,6 +410,7 @@ export default function Home() {
                     </div>
                   ) : (
                     <>
+                      {originalId && <p className="field-note">已載入收藏原文。解鎖原文區後，可依另一個程度重新出題；上傳新檔案會改用新文章。</p>}
                       <button
                         className="upload-zone"
                         onClick={() => input.current?.click()}
@@ -427,7 +459,7 @@ export default function Home() {
                         或貼上文章
                         <textarea
                           value={article}
-                          onChange={(e) => setArticle(e.target.value)}
+                          onChange={(e) => {setArticle(e.target.value);setOriginalId('');}}
                           placeholder="貼上完整文章內容…"
                           rows={4}
                         />
@@ -485,7 +517,7 @@ export default function Home() {
                   </p>
                   <button
                     className="primary generate"
-                    disabled={busy}
+                    disabled={busy||coverBusy}
                     onClick={generate}
                   >
                     {busy ? (
@@ -493,7 +525,7 @@ export default function Home() {
                     ) : (
                       <Sparkles size={19} />
                     )}{" "}
-                    {busy
+                    {coverBusy ? '正在製作原創封面…' : busy
                       ? "正在閱讀文章並出題…"
                       : demo
                         ? "依設定產生範例學習單"
@@ -502,6 +534,7 @@ export default function Home() {
                   <p className="generate-note">
                     5 題閱讀理解 ＋ 心智圖 ＋ 2 題開放題
                   </p>
+                  {!demo && <p className="generate-note">自動製作原創封面並收藏。文字、圖片與朗讀依 API 使用量計費。</p>}
                   {error && (
                     <p className="error" role="alert">
                       {error}
@@ -525,6 +558,13 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
+                {!sheet.sample && sheet.id && <div className="cover-summary" aria-live="polite">
+                  {sheet.cover && <img src={sheet.cover} alt={sheet.title+' 原創封面'}/>}
+                  <div><strong>{coverBusy?'正在依文章主軸製作封面…':sheet.cover?'原創封面已收藏':'學習單已收藏，封面尚未完成'}</strong>
+                    {coverError && <p role="alert">{coverError}</p>}
+                    {!sheet.cover && <button className="text-button" disabled={coverBusy||busy} onClick={()=>createCover()}>{coverBusy?'請稍候…':'生成／重試封面'}</button>}
+                  </div>
+                </div>}
                 <article className="worksheet">
                   <div className="worksheet-header">
                   <div className="sheet-kicker">
@@ -799,7 +839,8 @@ export default function Home() {
             </button>
             <Settings size={26} />
             <h2 id="settings-title">AI 連線設定</h2>
-            <p>新文章會交由 OpenAI 辨識並出題。範例不需要金鑰即可使用。</p>
+            <p>同一組 API key 用於文章辨識、設計學習單、生成原創封面與朗讀。範例不需要金鑰即可使用。</p>
+            <p>API 帳戶需有可用額度與圖片模型權限；圖片生成可能需要完成 OpenAI 帳戶驗證。</p>
             <p className="connection-state">
               {keyReady ? "網站已設定 AI 金鑰" : "尚未設定網站 AI 金鑰"}
             </p>
