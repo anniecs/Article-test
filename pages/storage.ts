@@ -1,0 +1,10 @@
+export async function db(){return new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open('wadoche-v1',1);r.onupgradeneeded=()=>r.result.createObjectStore('data');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});}
+export async function read<T>(id:string):Promise<T|undefined>{const d=await db();return new Promise((res,rej)=>{const t=d.transaction('data');const r=t.objectStore('data').get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);t.oncomplete=()=>d.close();});}
+export async function write(id:string,value:unknown){const d=await db();return new Promise<void>((res,rej)=>{const t=d.transaction('data','readwrite');t.objectStore('data').put(value,id);t.oncomplete=()=>{d.close();res();};t.onerror=()=>rej(t.error);});}
+export const b64=(a:Uint8Array)=>btoa(Array.from(a,x=>String.fromCharCode(x)).join(''));
+const bytes=(s:string)=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+export type Envelope={iv:string;data:string};
+export async function derive(password:string,salt:string){const m=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:bytes(salt),iterations:210000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+export async function encrypt(key:CryptoKey,v:unknown):Promise<Envelope>{const iv=crypto.getRandomValues(new Uint8Array(12));return {iv:b64(iv),data:b64(new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(v)))))};}
+export async function decrypt<T>(key:CryptoKey,v:Envelope):Promise<T>{return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:bytes(v.iv)},key,bytes(v.data))));}
+export function download(name:string,data:string,type='application/json'){const u=URL.createObjectURL(new Blob([data],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
