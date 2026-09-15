@@ -210,12 +210,12 @@ export default function Home() {
   return (
     <div className="app">
       <aside className="sidebar">
-          <a className="brand" href="/" aria-label="每一頁，都算數首頁">
+          <a className="brand" href="/" aria-label="挖讀冊首頁">
           <span className="brand-icon">
             <BookOpen size={23} />
           </span>
           <span>
-              每一頁，<small>都算數</small>
+              挖讀冊
           </span>
         </a>
         <div className="workspace-label">我的閱讀空間</div>
@@ -362,7 +362,7 @@ export default function Home() {
           <main className="content">
             <div className="page-heading">
               <div>
-              <div className="eyebrow">每一頁，都算數</div>
+              <div className="eyebrow">挖讀冊</div>
               <h1>欸你 (Annie) 這次看哪一篇～</h1>
               <p>讀的每一頁，都算數。</p>
               </div>
@@ -568,7 +568,7 @@ export default function Home() {
                 <article className="worksheet">
                   <div className="worksheet-header">
                   <div className="sheet-kicker">
-                    每一頁 · 都算數 · 閱讀學習單
+                    挖讀冊 · 閱讀學習單
                   </div>
                     <h2>{sheet.title}</h2>
                     <p>{sheet.source}</p>

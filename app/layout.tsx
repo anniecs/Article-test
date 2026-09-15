@@ -5,7 +5,7 @@ import "./fixes.css";
 import "./read-aloud.css";
 
 export const metadata: Metadata = {
-  title: "每一頁，都算數｜閱讀學習單",
+  title: "挖讀冊｜閱讀學習單",
   description: "讀的每一頁，都算數。依孩子的程度製作閱讀理解、心智圖、開放題與小文章。",
   other: {
     "codex-preview": "development",
