@@ -1,3 +1,7 @@
 /* The Pages edition shares the site's typography, palette and mind-map styles. */
 @import '../app/globals.css';
+@import '../app/features.css';
+@import '../app/fixes.css';
+@import '../app/read-aloud.css';
+.radial-center strong span{font-size:inherit;color:inherit}
 .level-controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}.option-row{display:flex;align-items:center;gap:8px}.option-row label{flex:1}.sentence{display:flex;align-items:center;gap:14px;margin:16px 0}.sentence p{flex:1;line-height:2}.panel{margin-bottom:20px}.panel p{line-height:1.9}.panel h2{display:flex;gap:10px;align-items:center}.field textarea,.question textarea{width:100%;min-height:130px;border:1px solid var(--border);border-radius:10px;padding:15px;font:inherit}.library-card{text-align:left;font:inherit;cursor:pointer;border:1px solid var(--border);background:white;border-radius:16px;color:inherit}.library-grid{margin-bottom:25px}.side-note{margin-top:auto}.speak-button{flex-shrink:0}summary{cursor:pointer;font-weight:600;margin-bottom:18px}.brand-icon{flex-shrink:0}@media print{.sidebar,.topbar,.level-controls,.tabs,.page-heading button{display:none!important}.main{margin:0}.content{padding:0}.worksheet{box-shadow:none;border:0}}
