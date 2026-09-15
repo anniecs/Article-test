@@ -17,11 +17,12 @@ import {
   ArrowLeft,
   LoaderCircle,
 } from "lucide-react";
-import { sample, type Sheet, type Words } from "./sample";
+import { type Sheet, type Words } from "./sample";
 import Vault from "./Vault";
 import MindMap from "./MindMap";
 import { LockKeyhole } from "lucide-react";
 import SpeakButton from "./SpeakButton";
+import { builtinSheet, builtinLibrary, type BuiltinId } from './catalog';
 
 export default function Home() {
   const [view, setView] = useState("studio"),
@@ -32,7 +33,7 @@ export default function Home() {
     [level, setLevel] = useState("幼兒園"),
     [files, setFiles] = useState<File[]>([]),
     [demo, setDemo] = useState(true),
-    [sheet, setSheet] = useState<Sheet>(sample("幼兒園", "適中")),
+    [sheet, setSheet] = useState<Sheet>(builtinSheet('lion', '幼兒園')),
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [showAnswers, setShowAnswers] = useState(false),
@@ -45,6 +46,7 @@ export default function Home() {
     [notice, setNotice] = useState(""),
     [page, setPage] = useState(1);
   const [vaultPassword, setVaultPassword] = useState("");
+  const [builtinId, setBuiltinId] = useState<BuiltinId>('lion');
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     fetch("/api/status")
@@ -103,7 +105,7 @@ export default function Home() {
     try {
       if (demo) {
         setSheet({
-          ...sample(level, "適中", "1–2年級"),
+          ...builtinSheet(builtinId, level),
           source,
           title: title || "獅子與豪豬",
         });
@@ -275,7 +277,7 @@ export default function Home() {
               </p>
             )}
             {[
-              ...new Set(["康軒學前9月份", ...library.map((s) => s.source)]),
+              ...new Set([...builtinLibrary(level).map(s => s.source), ...library.map((s) => s.source)]),
             ].map((s) => (
               <section className="library-group" key={s}>
                 <h2>
@@ -283,21 +285,33 @@ export default function Home() {
                 </h2>
                 <div className="library-grid">
                   {[
-                    ...(s === "康軒學前9月份"
-                      ? [sample("幼兒園", "適中")]
-                      : []),
+                    ...builtinLibrary(level).filter(a => a.source === s),
                     ...library.filter((a) => a.source === s),
                   ].map((item, i) => (
                     <button
                       className="library-card"
                       key={i}
                       onClick={() => {
-                        setSheet(item);
+                        setError('');
+                        setTab('reading');
+                        if (item.builtinId) {
+                          setBuiltinId(item.builtinId);
+                          setDemo(true);
+                          setSheet(builtinSheet(item.builtinId, level));
+                        } else {
+                          setDemo(false);
+                          setSheet(item);
+                          setLevel(item.level);
+                        }
+                        setTitle(item.title);
+                        setSource(item.source);
+                        setArticle('');
+                        setFiles([]);
                         setView("studio");
                         clearResults();
                       }}
                     >
-                      <BookOpen />
+                      {item.cover ? <img className="library-cover" src={item.cover} alt={item.title + ' 原創封面'} /> : <div className="library-cover-placeholder"><BookOpen /></div>}
                       <h3>{item.title}</h3>
                       <p>
                         {item.level}
@@ -336,6 +350,7 @@ export default function Home() {
                       className="text-button"
                       onClick={() => {
                         setDemo(!demo);
+                        setBuiltinId('lion');
                         setFiles([]);
                         setArticle("");
                         setTitle(demo ? "" : "獅子與豪豬");
@@ -348,16 +363,11 @@ export default function Home() {
                   {demo ? (
                     <div className="sample-book">
                       <div className="book-cover">
-                        <BookOpen size={25} />
-                        <span>
-                          獅子
-                          <br />
-                          與豪豬
-                        </span>
+                        <img src={builtinSheet(builtinId, level).cover} alt={builtinSheet(builtinId, level).title + ' 原創封面'} />
                       </div>
                       <div>
-                        <span className="mini-label">本次共讀範例</span>
-                        <strong>獅子與豪豬</strong>
+                        <span className="mini-label">本次共讀文章</span>
+                        <strong>{builtinSheet(builtinId, level).title}</strong>
                         <span>5 張圖片 · 第 42–51 頁</span>
                         <button
                           className="text-button"
@@ -456,7 +466,13 @@ export default function Home() {
                         key={l}
                         aria-pressed={level === l}
                         className={level === l ? "selected" : ""}
-                        onClick={() => setLevel(l)}
+                        onClick={() => {
+                          setLevel(l);
+                          if (demo) {
+                            setSheet({...builtinSheet(builtinId, l), source, title});
+                            clearResults();
+                          }
+                        }}
                       >
                         {level === l && <Check size={16} />} {l}
                       </button>
